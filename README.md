@@ -229,9 +229,9 @@ Error:
 
 Bash scripts are automated versions using tezos-client under the hood. For more details about tezos-client visit
 
-![tezos-client](https://assets.tqtezos.com/docs/setup/1-tezos-client/)
+- [tezos-client](https://assets.tqtezos.com/docs/setup/1-tezos-client/)
 
-![tezos-client manual](https://tezos.gitlab.io/shell/cli-commands.html)
+- [tezos-client manual](https://tezos.gitlab.io/shell/cli-commands.html)
 
 
 
