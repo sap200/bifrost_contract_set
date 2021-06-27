@@ -13,11 +13,6 @@ function header {
 
 # Function for executing command
 function execute {
-	echo "Inside execute"
-	echo "#0"
-	echo "$1"
-	echo "$2"
-	echo "$3"
 	
 	if [[ "$3" == "alice" ]]
 	then
@@ -51,7 +46,6 @@ fi
 
 if [[ "$1" == "0" ]]
 then 
-	echo "bifrost"
 	if [[ "$2" == "accounts" ]]
 	then
 		# execute system command for big map
@@ -68,7 +62,6 @@ then
 	fi	
 elif [[ "$1" == 1 ]]
 then
-	echo "fa12"
 	if [[ "$2" == "balance" ]]
 	then
 		# execute system command for big map
