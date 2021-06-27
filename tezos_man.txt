@@ -1,0 +1,1014 @@
+Usage:
+  tezos-client [global options] command [command options]
+  tezos-client --help (for global options)
+  tezos-client [global options] command --help (for command options)
+  tezos-client --version (for version information)
+
+To browse the documentation:
+  tezos-client [global options] man (for a list of commands)
+  tezos-client [global options] man -v 3 (for the full manual)
+
+Global options (must come before the command):
+  -d --base-dir <path>: client data directory
+  -c --config-file <path>: configuration file
+  -t --timings: show RPC request times
+  --chain <hash|tag>: chain on which to apply contextual commands (possible tags are 'main' and 'test')
+  -b --block <hash|tag>: block on which to apply contextual commands (possible tags are 'head' and 'genesis')
+  -w --wait <none|<int>>: how many confirmation blocks before to consider an operation as included
+  -p --protocol <hash>: use commands of a specific protocol
+  -l --log-requests: log all requests to the node
+  -A --addr <IP addr|host>: [DEPRECATED: use --endpoint instead] IP address of the node
+  -P --port <number>: [DEPRECATED: use --endpoint instead] RPC port of the node
+  -S --tls: [DEPRECATED: use --endpoint instead] use TLS to connect to node.
+  -E --endpoint <uri>: HTTP(S) endpoint of the node RPC interface; e.g. 'http://localhost:8732'
+  -R --remote-signer <uri>: URI of the remote signer
+  -f --password-filename <filename>: path to the password filename
+  -M --mode <client|mockup|proxy>: how to interact with the node
+
+Access the documentation:
+  man [<keyword>...] [-v --verbosity <0|1|2|3>]
+      [--format <plain|colors|html>]
+    Print documentation of commands.
+    <keyword>: keyword to search for
+    -v --verbosity <0|1|2|3>: level of details
+    --format <plain|colors|html>: the manual's output format
+
+Utility Commands:
+  sign message <message> for <src> [-b --block <hash|tag>]
+    Sign a message and display it using the failing_noop operation. This operation is not executable in the protocol. Please note that signing/checking an arbitrary message in itself is not sufficient to verify a key ownership
+    <message>: message to sign
+    <src>: name of the signer contract
+    -b --block <hash|tag>: block on which to apply contextual commands (possible tags are 'head' and 'genesis'). Defaults to 'genesis'.
+  check that message <message> was signed by <signer> to produce <signature> [-b --block <hash|tag>]
+      [-q --quiet]
+    Check the signature of an arbitrary message using the failing_noop operation. Please note that signing/checking an arbitrary message in itself is not sufficient to verify a key ownership.
+    <message>: signed message
+    <signer>: name of the signer contract
+    <signature>: the signature to check
+    -b --block <hash|tag>: block on which to apply contextual commands (possible tags are 'head' and 'genesis'). Defaults to 'genesis'.
+    -q --quiet: Use only exit codes
+
+Commands for working with Sapling transactions:
+  sapling gen key <new> [-f --force] [--unencrypted]
+    Generate a new sapling key.
+    <new>: new sapling_key alias
+    -f --force: overwrite existing sapling_key
+    --unencrypted: Do not encrypt the key on-disk (for testing and debugging).
+  sapling use key <sapling-key> for contract <contract> [--memo-size <memo-size>]
+    Use a sapling key for a contract.
+    <sapling-key>: Sapling key to use for the contract.
+    <contract>: Contract the key will be used on.
+    --memo-size <memo-size>: Expected length for message of Sapling transaction
+  sapling import key <new> [-f --force] [--unencrypted]
+      [--mnemonic <mnemonic>]
+    Restore a sapling key from mnemonic.
+    <new>: new sapling_key alias
+    -f --force: overwrite existing sapling_key
+    --unencrypted: Do not encrypt the key on-disk (for testing and debugging).
+    --mnemonic <mnemonic>: Mnemonic as an option, only used for testing and debugging.
+  sapling derive key <new> from <name> at index <child-index> [-f --force]
+      [--for-contract <for-contract>] [--unencrypted]
+      [--memo-size <memo-size>]
+    Derive a key from an existing one using zip32.
+    <new>: new sapling_key alias
+    <name>: existing sapling_key alias
+    <child-index>: Index of the child to derive.
+    -f --force: overwrite existing sapling_key
+    --for-contract <for-contract>: name of the contract to associate new key with
+    --unencrypted: Do not encrypt the key on-disk (for testing and debugging).
+    --memo-size <memo-size>: Expected length for message of Sapling transaction
+  sapling gen address <name> [--address-index <idx>]
+    Generate an address for a key referenced by alias.
+    <name>: existing sapling_key alias
+    --address-index <idx>: index of the address to generate
+  sapling export key <name> in <file>
+    Save a sapling viewing key in a JSON file.
+    <name>: existing sapling_key alias
+    <file>: Filename.
+  sapling get balance for <sapling-key> in contract <contract> [-v --verbose]
+    Get balance associated with given sapling key and contract
+    <sapling-key>: Sapling key we get balance for.
+    <contract>: Contract we get balance from.
+    -v --verbose: Print the collection of non-spent inputs.
+  sapling list keys
+    List sapling keys.
+
+Commands for managing a multisig smart contract:
+  deploy multisig <new_multisig> transferring <qty> from <src> with threshold <threshold> on public keys [<key>...] [--fee <amount>]
+      [-D --dry-run] [-G --gas-limit <amount>] [-S --storage-limit <amount>]
+      [--delegate <address>] [-f --force] [-q --no-print-source]
+      [--minimal-fees <amount>] [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--verbose-signing] [--burn-cap <amount>]
+    Originate a new multisig contract.
+    <new_multisig>: name of the new multisig contract
+    <qty>: amount taken from source in ꜩ
+    <src>: name of the source contract
+    <threshold>: Number of required signatures
+    <key>: Each signer of the multisig contract
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    -G --gas-limit <amount>: Set the gas limit of the transaction instead of letting the client decide based on a simulation
+    -S --storage-limit <amount>: Set the storage limit of the transaction instead of letting the client decide based on a simulation
+    --delegate <address>: delegate of the contract
+    -f --force: overwrite existing keys
+    -q --no-print-source: don't print the source code
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --verbose-signing: display extra information before signing the operation
+    --burn-cap <amount>: Set the burn cap
+  prepare multisig transaction on <multisig> transferring <qty> to <dst> [--bytes-only]
+    Display the threshold, public keys, and byte sequence to sign for a multisigned transfer.
+    <multisig>: name or address of the originated multisig contract
+    <qty>: amount taken from source in ꜩ
+    <dst>: name/literal of the destination contract
+    --bytes-only: return only the byte sequence to be signed
+  prepare multisig transaction on <multisig> setting delegate to <dlgt> [--bytes-only]
+    Display the threshold, public keys, and byte sequence to sign for a multisigned delegate change.
+    <multisig>: name or address of the originated multisig contract
+    <dlgt>: new delegate of the new multisig contract
+    --bytes-only: return only the byte sequence to be signed
+  prepare multisig transaction on <multisig> withdrawing delegate [--bytes-only]
+    Display the threshold, public keys, and byte sequence to sign for a multisigned delegate withdraw.
+    <multisig>: name or address of the originated multisig contract
+    --bytes-only: return only the byte sequence to be signed
+  prepare multisig transaction on <multisig> setting threshold to <threshold> and public keys to [<key>...] [--bytes-only]
+    Display the threshold, public keys, and byte sequence to sign for a multisigned change of keys and threshold.
+    <multisig>: name or address of the originated multisig contract
+    <threshold>: Number of required signatures
+    <key>: Each signer of the multisig contract
+    --bytes-only: return only the byte sequence to be signed
+  sign multisig transaction on <multisig> transferring <qty> to <dst> using secret key <key>
+    Sign a transaction for a multisig contract.
+    <multisig>: name or address of the originated multisig contract
+    <qty>: amount taken from source in ꜩ
+    <dst>: name/literal of the destination contract
+    <key>: Secret key corresponding to one of the public keys stored on the multisig contract
+  sign multisig transaction on <multisig> setting delegate to <dlgt> using secret key <key>
+    Sign a delegate change for a multisig contract.
+    <multisig>: name or address of the originated multisig contract
+    <dlgt>: new delegate of the new multisig contract
+    <key>: Secret key corresponding to one of the public keys stored on the multisig contract
+  sign multisig transaction on <multisig> withdrawing delegate using secret key <key>
+    Sign a delegate withdraw for a multisig contract.
+    <multisig>: name or address of the originated multisig contract
+    <key>: Secret key corresponding to one of the public keys stored on the multisig contract
+  sign multisig transaction on <multisig> using secret key <key> setting threshold to <threshold> and public keys to [<key>...]
+    Sign a change of public keys and threshold for a multisig contract.
+    <multisig>: name or address of the originated multisig contract
+    <key>: Secret key corresponding to one of the public keys stored on the multisig contract
+    <threshold>: Number of required signatures
+    <key>: Each signer of the multisig contract
+  from multisig contract <multisig> transfer <qty> to <dst> on behalf of <src> with signatures [<signature>...] [--fee <amount>]
+      [-D --dry-run] [--verbose-signing] [-G --gas-limit <amount>]
+      [-S --storage-limit <amount>] [-C --counter <counter>]
+      [-q --no-print-source] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>]
+    Transfer tokens using a multisig contract.
+    <multisig>: name/literal of the multisig contract
+    <qty>: amount taken from the multisig contract in ꜩ
+    <dst>: name/literal of the destination contract
+    <src>: source calling the multisig contract
+    <signature>: Each signer of the multisig contract
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    -G --gas-limit <amount>: Set the gas limit of the transaction instead of letting the client decide based on a simulation
+    -S --storage-limit <amount>: Set the storage limit of the transaction instead of letting the client decide based on a simulation
+    -C --counter <counter>: Set the counter to be used by the transaction
+    -q --no-print-source: don't print the source code
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+  set delegate of multisig contract <multisig> to <dlgt> on behalf of <src> with signatures [<signature>...] [--fee <amount>]
+      [-D --dry-run] [--verbose-signing] [-G --gas-limit <amount>]
+      [-S --storage-limit <amount>] [-C --counter <counter>]
+      [-q --no-print-source] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>]
+    Change the delegate of a multisig contract.
+    <multisig>: name or address of the originated multisig contract
+    <dlgt>: new delegate of the new multisig contract
+    <src>: source calling the multisig contract
+    <signature>: Each signer of the multisig contract
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    -G --gas-limit <amount>: Set the gas limit of the transaction instead of letting the client decide based on a simulation
+    -S --storage-limit <amount>: Set the storage limit of the transaction instead of letting the client decide based on a simulation
+    -C --counter <counter>: Set the counter to be used by the transaction
+    -q --no-print-source: don't print the source code
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+  withdraw delegate of multisig contract <multisig> on behalf of <src> with signatures [<signature>...] [--fee <amount>]
+      [-D --dry-run] [--verbose-signing] [-G --gas-limit <amount>]
+      [-S --storage-limit <amount>] [-C --counter <counter>]
+      [-q --no-print-source] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>]
+    Withdraw the delegate of a multisig contract.
+    <multisig>: name or address of the originated multisig contract
+    <src>: source calling the multisig contract
+    <signature>: Each signer of the multisig contract
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    -G --gas-limit <amount>: Set the gas limit of the transaction instead of letting the client decide based on a simulation
+    -S --storage-limit <amount>: Set the storage limit of the transaction instead of letting the client decide based on a simulation
+    -C --counter <counter>: Set the counter to be used by the transaction
+    -q --no-print-source: don't print the source code
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+  set threshold of multisig contract <multisig> to <threshold> and public keys to [<key>...] on
+      behalf of <src> with signatures [<signature>...] [--fee <amount>]
+      [-D --dry-run] [--verbose-signing] [-G --gas-limit <amount>]
+      [-S --storage-limit <amount>] [-C --counter <counter>]
+      [-q --no-print-source] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>] [--fee <amount>]
+      [-D --dry-run] [--verbose-signing] [-G --gas-limit <amount>]
+      [-S --storage-limit <amount>] [-C --counter <counter>]
+      [-q --no-print-source] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>]
+    Change public keys and threshold for a multisig contract.
+    <multisig>: name or address of the originated multisig contract
+    <threshold>: Number of required signatures
+    <key>: Each signer of the multisig contract
+    <src>: source calling the multisig contract
+    <signature>: Each signer of the multisig contract
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    -G --gas-limit <amount>: Set the gas limit of the transaction instead of letting the client decide based on a simulation
+    -S --storage-limit <amount>: Set the storage limit of the transaction instead of letting the client decide based on a simulation
+    -C --counter <counter>: Set the counter to be used by the transaction
+    -q --no-print-source: don't print the source code
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+  run transaction <bytes> on multisig contract <multisig> on behalf of <src> with signatures [<signature>...] [--fee <amount>]
+      [-D --dry-run] [--verbose-signing] [-G --gas-limit <amount>]
+      [-S --storage-limit <amount>] [-C --counter <counter>]
+      [-q --no-print-source] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>]
+    Run a transaction described by a sequence of bytes on a multisig contract.
+    <bytes>: the sequence of bytes to deserialize as a multisig action, can be obtained by one of the "prepare multisig transaction" commands
+    <multisig>: name or address of the originated multisig contract
+    <src>: source calling the multisig contract
+    <signature>: Each signer of the multisig contract
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    -G --gas-limit <amount>: Set the gas limit of the transaction instead of letting the client decide based on a simulation
+    -S --storage-limit <amount>: Set the storage limit of the transaction instead of letting the client decide based on a simulation
+    -C --counter <counter>: Set the counter to be used by the transaction
+    -q --no-print-source: don't print the source code
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+  show supported multisig hashes
+    Show the hashes of the supported multisig contracts.
+
+Binary Description:
+  describe unsigned block header
+    Describe unsigned block header
+  describe unsigned operation
+    Describe unsigned block header
+
+Block contextual commands (see option -block):
+  get timestamp [-s --seconds]
+    Access the timestamp of the block.
+    -s --seconds: output time in seconds
+  list contracts
+    Lists all non empty contracts of the block.
+  get balance for <src>
+    Get the balance of a contract.
+    <src>: source contract
+  get contract storage for <src> [--unparsing-mode <mode>]
+    Get the storage of a contract.
+    <src>: source contract
+    --unparsing-mode <mode>: Unparsing mode to use
+  get big map value for <key> of type <type> in <src>
+    Get the value associated to a key in the big map storage of a contract (deprecated).
+    <key>: the key to look for
+    <type>: type of the key
+    <src>: source contract
+  get element <key> of big map <big_map> [--unparsing-mode <mode>]
+    Get a value in a big map.
+    <key>: the key to look for
+    <big_map>: identifier of the big_map
+    --unparsing-mode <mode>: Unparsing mode to use
+  get contract code for <src> [--unparsing-mode <mode>]
+    Get the code of a contract.
+    <src>: source contract
+    --unparsing-mode <mode>: Unparsing mode to use
+  get contract entrypoint type of <entrypoint> for <src>
+    Get the type of an entrypoint of a contract.
+    <entrypoint>: the entrypoint to describe
+    <src>: source contract
+  get contract entrypoints for <src>
+    Get the entrypoint list of a contract.
+    <src>: source contract
+  get contract unreachable paths for <src>
+    Get the list of unreachable paths in a contract's parameter type.
+    <src>: source contract
+  get delegate for <src>
+    Get the delegate of a contract.
+    <src>: source contract
+  set delegate for <src> to <dlgt> [--fee <amount>] [-D --dry-run]
+      [--verbose-signing] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>]
+    Set the delegate of a contract.
+    <src>: source contract
+    <dlgt>: new delegate of the contract
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+  withdraw delegate from <src> [--fee <amount>] [-D --dry-run]
+      [--verbose-signing] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>]
+    Withdraw the delegate from a contract.
+    <src>: source contract
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+  originate contract <new> transferring <qty> from <src> running <prg> [--fee <amount>]
+      [-D --dry-run] [--verbose-signing] [-G --gas-limit <amount>]
+      [-S --storage-limit <amount>] [--delegate <address>] [-f --force]
+      [--init <data>] [-q --no-print-source] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>]
+    Launch a smart contract on the blockchain.
+    <new>: name of the new contract
+    <qty>: amount taken from source in ꜩ
+    <src>: name of the source contract
+    <prg>: script of the account
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    -G --gas-limit <amount>: Set the gas limit of the transaction instead of letting the client decide based on a simulation
+    -S --storage-limit <amount>: Set the storage limit of the transaction instead of letting the client decide based on a simulation
+    --delegate <address>: delegate of the contract
+    -f --force: overwrite existing keys
+    --init <data>: initial value of the contract's storage
+    -q --no-print-source: don't print the source code
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+  multiple transfers from <src> using <transfers.json> [--default-fee <amount>]
+      [-D --dry-run] [--verbose-signing] [-G --default-gas-limit <amount>]
+      [-S --default-storage-limit <amount>] [-C --counter <counter>]
+      [--default-arg <data>] [-q --no-print-source] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>]
+      [--default-entrypoint <name>]
+    Execute multiple transfers from a single source account.
+    <src>: name of the source contract
+    <transfers.json>: List of operations originating from the source contract in JSON format (from a file or directly inlined). The input JSON must be an array of objects of the form: '[ {"destination": dst, "amount": qty (, <field>: <val> ...) } (, ...) ]', where an optional <field> can either be "fee", "gas-limit", "storage-limit", "arg", or "entrypoint".
+    --default-fee <amount>: default fee in ꜩ to pay to the baker for each transaction
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    -G --default-gas-limit <amount>: Set the default gas limit for each transaction instead of letting the client decide based on a simulation
+    -S --default-storage-limit <amount>: Set the default storage limit for each transaction instead of letting the client decide based on a simulation
+    -C --counter <counter>: Set the counter to be used by the transaction
+    --default-arg <data>: default argument passed to each contract's script, if needed
+    -q --no-print-source: don't print the source code
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+    --default-entrypoint <name>: default entrypoint of the smart contracts
+  transfer <qty> from <src> to <dst> [--fee <amount>] [-D --dry-run]
+      [--verbose-signing] [-G --gas-limit <amount>]
+      [-S --storage-limit <amount>] [-C --counter <counter>] [--arg <data>]
+      [-q --no-print-source] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>] [--entrypoint <name>]
+    Transfer tokens / call a smart contract.
+    <qty>: amount taken from source in ꜩ
+    <src>: name of the source contract
+    <dst>: name/literal of the destination contract
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    -G --gas-limit <amount>: Set the gas limit of the transaction instead of letting the client decide based on a simulation
+    -S --storage-limit <amount>: Set the storage limit of the transaction instead of letting the client decide based on a simulation
+    -C --counter <counter>: Set the counter to be used by the transaction
+    --arg <data>: argument passed to the contract's script, if needed
+    -q --no-print-source: don't print the source code
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+    --entrypoint <name>: entrypoint of the smart contract
+  call <dst> from <src> [--fee <amount>] [-D --dry-run] [--verbose-signing]
+      [-G --gas-limit <amount>] [-S --storage-limit <amount>]
+      [-C --counter <counter>] [--arg <data>] [-q --no-print-source]
+      [--minimal-fees <amount>] [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>] [--entrypoint <name>]
+    Call a smart contract (same as 'transfer 0').
+    <dst>: name/literal of the destination contract
+    <src>: name of the source contract
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    -G --gas-limit <amount>: Set the gas limit of the transaction instead of letting the client decide based on a simulation
+    -S --storage-limit <amount>: Set the storage limit of the transaction instead of letting the client decide based on a simulation
+    -C --counter <counter>: Set the counter to be used by the transaction
+    --arg <data>: argument passed to the contract's script, if needed
+    -q --no-print-source: don't print the source code
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+    --entrypoint <name>: entrypoint of the smart contract
+  reveal key for <src> [--fee <amount>] [-D --dry-run] [--verbose-signing]
+      [--minimal-fees <amount>] [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>]
+    Reveal the public key of the contract manager.
+    <src>: name of the source contract
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+  register key <mgr> as delegate [--fee <amount>] [-D --dry-run]
+      [--verbose-signing] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>]
+    Register the public key hash as a delegate.
+    <mgr>: the delegate key
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+  activate account <new> with <activation_key> [-f --force] [--encrypted]
+    Register and activate an Alphanet/Zeronet faucet account.
+    <new>: new secret_key alias
+    <activation_key>: Activate an Alphanet/Zeronet faucet account from the JSON (file or directly inlined).
+    -f --force: overwrite existing secret_key
+    --encrypted: encrypt the key on-disk
+  submit proposals for <delegate> [<proposal>...] [-D --dry-run]
+      [--verbose-signing] [--force]
+    Submit protocol proposals
+    <delegate>: the delegate who makes the proposal
+    <proposal>: the protocol hash proposal to be submitted
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    --force: Do not fail when the checks that try to prevent the user from shooting themselves in the foot do.
+  submit ballot for <delegate> <proposal> <ballot> [--verbose-signing]
+      [-D --dry-run]
+    Submit a ballot
+    <delegate>: the delegate who votes
+    <proposal>: the protocol hash proposal to vote for
+    <ballot>: the ballot value (yea/yay, nay, or pass)
+    --verbose-signing: display extra information before signing the operation
+    -D --dry-run: don't inject the operation, just display it
+  show voting period
+    Summarize the current voting period
+  sapling shield <qty> from <src-tz> to <dst-sap> using <sapling contract> [--fee <amount>]
+      [-D --dry-run] [--verbose-signing] [-G --gas-limit <amount>]
+      [-S --storage-limit <amount>] [-C --counter <counter>]
+      [-q --no-print-source] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>] [--message <>]
+    Shield tokens from an implicit account to a Sapling address.
+    <qty>: Amount taken from transparent wallet of source. in ꜩ
+    <src-tz>: Transparent source account.
+    <dst-sap>: Sapling address of destination.
+    <sapling contract>: Smart contract to submit this transaction to.
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    -G --gas-limit <amount>: Set the gas limit of the transaction instead of letting the client decide based on a simulation
+    -S --storage-limit <amount>: Set the storage limit of the transaction instead of letting the client decide based on a simulation
+    -C --counter <counter>: Set the counter to be used by the transaction
+    -q --no-print-source: don't print the source code
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+    --message <>: Message for Sapling transaction
+  sapling unshield <qty> from <src-sap> to <dst-tz> using <sapling contract> [--fee <amount>]
+      [-D --dry-run] [--verbose-signing] [-G --gas-limit <amount>]
+      [-S --storage-limit <amount>] [-C --counter <counter>]
+      [-q --no-print-source] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>]
+    Unshield tokens from a Sapling address to an implicit account.
+    <qty>: Amount taken from shielded wallet of source. in ꜩ
+    <src-sap>: Sapling account of source.
+    <dst-tz>: Transparent destination account.
+    <sapling contract>: Smart contract to submit this transaction to.
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    -G --gas-limit <amount>: Set the gas limit of the transaction instead of letting the client decide based on a simulation
+    -S --storage-limit <amount>: Set the storage limit of the transaction instead of letting the client decide based on a simulation
+    -C --counter <counter>: Set the counter to be used by the transaction
+    -q --no-print-source: don't print the source code
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+  sapling forge transaction <qty> from <src-sap> to <dst-sap> using <sapling contract> [--fee <amount>]
+      [-D --dry-run] [--verbose-signing] [-G --gas-limit <amount>]
+      [-S --storage-limit <amount>] [-C --counter <counter>]
+      [-q --no-print-source] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>] [--message <>]
+      [--file <sapling_transaction>] [--json]
+    Forge a sapling transaction and save it to a file.
+    <qty>: Amount taken from shielded wallet of source. in ꜩ
+    <src-sap>: Sapling account of source.
+    <dst-sap>: Sapling address of destination.
+    <sapling contract>: Smart contract to submit this transaction to.
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    -G --gas-limit <amount>: Set the gas limit of the transaction instead of letting the client decide based on a simulation
+    -S --storage-limit <amount>: Set the storage limit of the transaction instead of letting the client decide based on a simulation
+    -C --counter <counter>: Set the counter to be used by the transaction
+    -q --no-print-source: don't print the source code
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+    --message <>: Message for Sapling transaction
+    --file <sapling_transaction>: file name
+    --json: Use JSON format
+  sapling submit <file> from <alias-tz> using <sapling contract> [--fee <amount>]
+      [-D --dry-run] [--verbose-signing] [-G --gas-limit <amount>]
+      [-S --storage-limit <amount>] [-C --counter <counter>]
+      [-q --no-print-source] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-byte <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>] [--force-low-fee]
+      [--fee-cap <amount>] [--burn-cap <amount>] [--json]
+    Submit a forged sapling transaction.
+    <file>: Filename of the forged transaction.
+    <alias-tz>: Transparent account paying the fees.
+    <sapling contract>: Smart contract to submit this transaction to.
+    --fee <amount>: fee in ꜩ to pay to the baker
+    -D --dry-run: don't inject the operation, just display it
+    --verbose-signing: display extra information before signing the operation
+    -G --gas-limit <amount>: Set the gas limit of the transaction instead of letting the client decide based on a simulation
+    -S --storage-limit <amount>: Set the storage limit of the transaction instead of letting the client decide based on a simulation
+    -C --counter <counter>: Set the counter to be used by the transaction
+    -q --no-print-source: don't print the source code
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --force-low-fee: Don't check that the fee is lower than the estimated default value
+    --fee-cap <amount>: Set the fee cap
+    --burn-cap <amount>: Set the burn cap
+    --json: Use JSON format
+
+Commands for managing the record of known contracts:
+  remember contract <new> <src> [-f --force]
+    Add a contract to the wallet.
+    <new>: new contract alias
+    <src>: source contract
+    -f --force: overwrite existing contract
+  forget contract <name>
+    Remove a contract from the wallet.
+    <name>: existing contract alias
+  list known contracts
+    Lists all known contracts in the wallet.
+  forget all contracts [-f --force]
+    Forget the entire wallet of known contracts.
+    -f --force: overwrite existing contract
+  show known contract <name>
+    Display a contract from the wallet.
+    <name>: existing contract alias
+
+Commands for managing the library of known scripts:
+  list known scripts
+    Lists all scripts in the library.
+  remember script <new> <src> [-f --force]
+    Add a script to the library.
+    <new>: new script alias
+    <src>: source script
+    -f --force: overwrite existing script
+  forget script <name>
+    Remove a script from the library.
+    <name>: existing script alias
+  show known script <name>
+    Display a script from the library.
+    <name>: existing script alias
+  run script <src> on storage <storage> and input <input> [--trace-stack]
+      [--amount <amount>] [--balance <amount>] [--source <source>]
+      [--payer <payer>] [-q --no-print-source] [-G --gas <gas>]
+      [--entrypoint <name>] [--unparsing-mode <mode>]
+    Ask the node to run a script.
+    <src>: source script
+    <storage>: the storage data
+    <input>: the input data
+    --trace-stack: show the stack after each step
+    --amount <amount>: amount of the transfer in ꜩ
+    --balance <amount>: balance of run contract in ꜩ
+    --source <source>: name of the source (i.e. SENDER) contract for the transaction
+    --payer <payer>: name of the payer (i.e. SOURCE) contract for the transaction
+    -q --no-print-source: don't print the source code
+    -G --gas <gas>: Initial quantity of gas for typechecking and execution
+    --entrypoint <name>: entrypoint of the smart contract
+    --unparsing-mode <mode>: Unparsing mode to use
+  typecheck script <src> [-v --details] [--emacs] [-q --no-print-source]
+      [-G --gas <gas>] [--legacy]
+    Ask the node to typecheck a script.
+    <src>: source script
+    -v --details: show the types of each instruction
+    --emacs: output in `michelson-mode.el` compatible format
+    -q --no-print-source: don't print the source code
+    -G --gas <gas>: Initial quantity of gas for typechecking and execution
+    --legacy: typecheck in legacy mode as if the data was taken from the chain
+  typecheck data <data> against type <type> [-q --no-print-source]
+      [-G --gas <gas>] [--legacy]
+    Ask the node to typecheck a data expression.
+    <data>: the data to typecheck
+    <type>: the expected type
+    -q --no-print-source: don't print the source code
+    -G --gas <gas>: Initial quantity of gas for typechecking and execution
+    --legacy: typecheck in legacy mode as if the data was taken from the chain
+  hash data <data> of type <type> [-G --gas <gas>]
+    Ask the node to pack a data expression.
+    <data>: the data to hash
+    <type>: type of the data
+    -G --gas <gas>: Initial quantity of gas for typechecking and execution
+  unpack michelson data <bytes>
+    Parse a byte sequence (in hexadecimal notation) as a data expression, as per Michelson instruction `UNPACK`.
+    <bytes>: the packed data to parse
+  normalize script <src> [--unparsing-mode <mode>]
+    Ask the node to normalize a script.
+    <src>: source script
+    --unparsing-mode <mode>: Unparsing mode to use
+  normalize data <data> of type <type> [--unparsing-mode <mode>] [--legacy]
+    Ask the node to normalize a data expression.
+    <data>: the data expression to normalize
+    <type>: type of the data expression
+    --unparsing-mode <mode>: Unparsing mode to use
+    --legacy: typecheck in legacy mode as if the data was taken from the chain
+  normalize type <typ>
+    Ask the node to normalize a type.
+    <typ>: the Michelson type to normalize
+  sign bytes <data> for <src>
+    Sign a raw sequence of bytes and display it using the format expected by Michelson instruction `CHECK_SIGNATURE`.
+    <data>: the raw data to sign
+    <src>: source secret_key
+  check that bytes <bytes> were signed by <key> to produce <signature> [-q --quiet]
+    Check the signature of a byte sequence as per Michelson instruction `CHECK_SIGNATURE`.
+    <bytes>: the signed data
+    <key>: existing public_key alias
+    <signature>: the signature to check
+    -q --quiet: Use only exit codes
+  get script entrypoint type of <entrypoint> for <src> [--emacs]
+      [-q --no-print-source]
+    Ask the type of an entrypoint of a script.
+    <entrypoint>: the entrypoint to describe
+    <src>: source script
+    --emacs: output in `michelson-mode.el` compatible format
+    -q --no-print-source: don't print the source code
+  get script entrypoints for <src> [--emacs] [-q --no-print-source]
+    Ask the node to list the entrypoints of a script.
+    <src>: source script
+    --emacs: output in `michelson-mode.el` compatible format
+    -q --no-print-source: don't print the source code
+  get script unreachable paths for <src> [--emacs] [-q --no-print-source]
+    Ask the node to list the unreachable paths in a script's parameter type.
+    <src>: source script
+    --emacs: output in `michelson-mode.el` compatible format
+    -q --no-print-source: don't print the source code
+  expand macros in <src>
+    Ask the node to expand the Michelson macros in a script.
+    <src>: source script
+
+Commands related to delegate operations.:
+  bake for <baker> [--max-priority <slot>] [--minimal-fees <amount>]
+      [--minimal-nanotez-per-gas-unit <amount>]
+      [--minimal-nanotez-per-byte <amount>] [-f --force]
+      [--minimal-timestamp] [--mempool <file>] [--context <path>]
+    Forge and inject block using the delegate rights.
+    <baker>: name of the delegate owning the baking right
+    --max-priority <slot>: maximum allowed baking slot
+    --minimal-fees <amount>: exclude operations with fees lower than this threshold (in tez)
+    --minimal-nanotez-per-gas-unit <amount>: exclude operations with fees per gas lower than this threshold (in nanotez)
+    --minimal-nanotez-per-byte <amount>: exclude operations with fees per byte lower than this threshold (in nanotez)
+    -f --force: disables the node's injection checks
+    --minimal-timestamp: Use the minimal timestamp instead of the current date as timestamp of the baked block.
+    --mempool <file>: When used the client will read the mempool in the provided file instead of querying the node through an RPC (useful for debugging only).
+    --context <path>: When use the client will read in the local context at the provided path in order to build the block, instead of relying on the 'preapply' RPC.
+  reveal nonce for [<block>...]
+    Forge and inject a seed-nonce revelation operation.
+    <block>: commitment blocks whose nonce should be revealed
+  reveal nonces
+    Forge and inject all the possible seed-nonce revelation operations.
+  endorse for <baker>
+    Forge and inject an endorsement operation.
+    <baker>: name of the delegate owning the endorsement right
+  filter orphan nonces
+    Clear the nonces file by removing the nonces which blocks cannot be found on the chain.
+  list orphan nonces
+    List orphan nonces.
+
+Commands for creating mockup environments:
+  list mockup protocols
+    List available protocols available for mockup construction.
+  migrate mockup to <hash>
+    Migrates an on-disk mockup context from a protocol to another.
+    <hash>: Protocol hash of the next protocol
+  create mockup [--protocol-constants <path>] [--bootstrap-accounts <path>]
+      [--asynchronous]
+    Create a mockup environment.
+    --protocol-constants <path>: a JSON file that contains protocol constants to set.
+    --bootstrap-accounts <path>: a JSON file that contains definitions of bootstrap accounts to create.
+    --asynchronous: put operations in mempool and require baking to include in the chain
+
+Commands for managing the wallet of cryptographic keys:
+  list signing schemes
+    List supported signing schemes.
+  gen keys <new> [-f --force] [-s --sig <ed25519|secp256k1|p256>]
+      [--encrypted]
+    Generate a pair of keys.
+    <new>: new secret_key alias
+    -f --force: overwrite existing secret_key
+    -s --sig <ed25519|secp256k1|p256>: use custom signature algorithm
+    --encrypted: Encrypt the key on-disk
+  gen vanity keys <new> matching [<words>...] [-P --prefix] [-f --force]
+      [--encrypted]
+    Generate keys including the given string.
+    <new>: new public key hash alias
+    <words>: string key must contain one of these words
+    -P --prefix: the key must begin with tz1[word]
+    -f --force: overwrite existing keys
+    --encrypted: Encrypt the key on-disk
+  encrypt secret key
+    Encrypt an unencrypted secret key.
+  import secret key <new> <uri> [-f --force]
+    Add a secret key to the wallet.
+    <new>: new secret_key alias
+    <uri>: secret key
+    -f --force: overwrite existing secret_key
+  import public key <new> <uri> [-f --force]
+    Add a public key to the wallet.
+    <new>: new public_key alias
+    <uri>: public key
+    -f --force: overwrite existing public_key
+  add address <new> <src> [-f --force]
+    Add an address to the wallet.
+    <new>: new public key hash alias
+    <src>: source public key hash
+    -f --force: overwrite existing public_key
+  list known addresses
+    List all addresses and associated keys.
+  show address <name> [-S --show-secret]
+    Show the keys associated with an implicit account.
+    <name>: existing public key hash alias
+    -S --show-secret: show the private key
+  forget address <name> [-f --force]
+    Forget one address.
+    <name>: existing public key hash alias
+    -f --force: delete associated keys when present
+  forget all keys [-f --force]
+    Forget the entire wallet of keys.
+    -f --force: you got to use the force for that
+  generate nonce for <name> from <data>
+    Compute deterministic nonce.
+    <name>: existing public key hash alias
+    <data>: string from which to deterministically generate the nonce
+  generate nonce hash for <name> from <data>
+    Compute deterministic nonce hash.
+    <name>: existing public key hash alias
+    <data>: string from which to deterministically generate the nonce hash
+  import keys from mnemonic <new> [-f --force] [--encrypt]
+    Import a pair of keys to the wallet from a mnemonic phrase. This command uses the BIP39 algorithm, and therefore imports public/secret keys that may be different from a Ledger application, depending on the BIP32 derivation path used in the Ledger. This command also uses the Ed25519 algorithm, which means it generates tz1 public key hashes.
+    <new>: new secret_key alias
+    -f --force: overwrite existing secret_key
+    --encrypt: encrypt the secret key
+  pvss gen keys <new> [-f --force]
+    Generate a pair of PVSS keys.
+    <new>: new PVSS secret key alias
+    -f --force: overwrite existing secret_key
+  pvss list keys
+    List PVSS keys.
+  pvss forget keys <name> [-f --force]
+    Forget one pair of PVSS keys.
+    <name>: existing PVSS public key alias
+    -f --force: you got to use the force for that
+  pvss forget all keys [-f --force]
+    Forget all PVSS keys.
+    -f --force: you got to use the force for that
+
+Commands for managing the connected Ledger Nano devices:
+  list connected ledgers
+    List supported Ledger Nano devices connected.
+  show ledger <account-alias-or-ledger-uri> [--test-sign]
+    Display version/public-key/address information for a Ledger URI
+    <account-alias-or-ledger-uri>: An imported ledger alias or a ledger URI (e.g. "ledger://animal/curve/path").
+    --test-sign: Test signing operation
+  get ledger authorized path for <account-alias-or-ledger-uri>
+    Query the path of the authorized key
+    <account-alias-or-ledger-uri>: An imported ledger alias or a ledger URI (e.g. "ledger://animal/curve/path").
+  authorize ledger to bake for <account-alias-or-ledger-uri>
+    Authorize a Ledger to bake for a key (deprecated, use `setup ledger ...` with recent versions of the Baking app)
+    <account-alias-or-ledger-uri>: An imported ledger alias or a ledger URI (e.g. "ledger://animal/curve/path").
+  setup ledger to bake for <account-alias-or-ledger-uri> [--main-chain-id <ID>]
+      [--main-hwm <HWM>] [--test-hwm <HWM>]
+    Setup a Ledger to bake for a key
+    <account-alias-or-ledger-uri>: An imported ledger alias or a ledger URI (e.g. "ledger://animal/curve/path").
+    --main-chain-id <ID>: Use <ID> as main chain-id instead of asking the node.
+    --main-hwm <HWM>: Use <HWM> as main chain high watermark instead of asking the ledger.
+    --test-hwm <HWM>: Use <HWM> as test chain high watermark instead of asking the ledger.
+  deauthorize ledger baking for <account-alias-or-ledger-uri>
+    Deauthorize Ledger from baking
+    <account-alias-or-ledger-uri>: An imported ledger alias or a ledger URI (e.g. "ledger://animal/curve/path").
+  get ledger high water mark for <account-alias-or-ledger-uri> [--no-legacy-instructions]
+    Get high water mark of a Ledger
+    <account-alias-or-ledger-uri>: An imported ledger alias or a ledger URI (e.g. "ledger://animal/curve/path").
+    --no-legacy-instructions: Prevent the fallback to the (deprecated) Ledger instructions (for 1.x.y versions of the Baking app)
+  set ledger high water mark for <account-alias-or-ledger-uri> to <high watermark>
+    Set high water mark of a Ledger
+    <account-alias-or-ledger-uri>: An imported ledger alias or a ledger URI (e.g. "ledger://animal/curve/path").
+    <high watermark>: High watermark
+  get ledger high watermark for <account-alias-or-ledger-uri> [--no-legacy-instructions]
+    Get high water mark of a Ledger (legacy/deprecated spelling)
+    <account-alias-or-ledger-uri>: An imported ledger alias or a ledger URI (e.g. "ledger://animal/curve/path").
+    --no-legacy-instructions: Prevent the fallback to the (deprecated) Ledger instructions (for 1.x.y versions of the Baking app)
+  set ledger high watermark for <account-alias-or-ledger-uri> to <high watermark>
+    Set high water mark of a Ledger (legacy/deprecated spelling)
+    <account-alias-or-ledger-uri>: An imported ledger alias or a ledger URI (e.g. "ledger://animal/curve/path").
+    <high watermark>: High watermark
+
+Commands for the low level RPC layer:
+  rpc list <url>
+    List RPCs under a given URL prefix.
+    <url>: the URL prefix
+  rpc list
+    Alias to `rpc list /`.
+  rpc schema <HTTP method> <url>
+    Get the input and output JSON schemas of an RPC.
+    <HTTP method>: 
+    <url>: the RPC url
+  rpc format <HTTP method> <url> [-b --binary]
+    Get the humanoid readable input and output formats of an RPC.
+    <HTTP method>: 
+    <url>: the RPC URL
+    -b --binary: Binary format
+  rpc get <url>
+    Call an RPC with the GET method.
+    <url>: the RPC URL
+  rpc post <url>
+    Call an RPC with the POST method.
+    <url>: the RPC URL
+  rpc post <url> with <input>
+    Call an RPC with the POST method, providing input data via the command line.
+    <url>: the RPC URL
+    <input>: the raw JSON input to the RPC
+  rpc patch <url>
+    Call an RPC with the PATCH method.
+    <url>: the RPC URL
+  rpc patch <url> with <input>
+    Call an RPC with the PATCH method, providing input data via the command line.
+    <url>: the RPC URL
+    <input>: the raw JSON input to the RPC
+  rpc put <url>
+    Call an RPC with the PUT method.
+    <url>: the RPC URL
+  rpc put <url> with <input>
+    Call an RPC with the PUT method, providing input data via the command line.
+    <url>: the RPC URL
+    <input>: the raw JSON input to the RPC
+  rpc delete <url>
+    Call an RPC with the DELETE method.
+    <url>: the RPC URL
+
+Commands for editing and viewing the client's config file:
+  config show
+    Show the current config (config file content + command line arguments) or the mockup config files if `--mode mockup` is specified.
+  config reset
+    Reset the config file to the factory defaults.
+  config update
+    Update the config based on the current cli values.
+  config init [-o --output <path>] [--bootstrap-accounts <path>]
+      [--protocol-constants <path>]
+    Create config file(s) based on the current CLI values.
+    -o --output <path>: path at which to create the file
+    --bootstrap-accounts <path>: path at which to create the file
+    --protocol-constants <path>: path at which to create the file
+
+Miscellaneous commands:
+  list understood protocols
+    List the protocol versions that this client understands.
+  complete <prefix> [-u --unique]
+    Autocomplete a prefix of Base58Check-encoded hash.
+    <prefix>: the prefix of the hash to complete
+    -u --unique: Fail when there is more than one possible completion.
+  bootstrapped
+    Wait for the node to be bootstrapped.
+  compute chain id from block hash <hash>
+    Computes the chain id corresponding to a block hash.
+    <hash>: the block hash from which to compute the chain id
+  compute chain id from seed <string>
+    Computes a chain id from a seed
+    <string>: the seed from which to compute the chain id
+  convert script <source> from <input_format> to <output_format> [-z --zero-loc]
+    Conversion of Michelson script from Micheline, JSON or binary to Micheline, JSON, binary or OCaml
+    <source>: literal or a path to a file
+    <input_format>: format of the input for conversion
+    <output_format>: format of the conversion output
+    -z --zero-loc: replace location with "0"
+  convert data <source> from <input_format> to <output_format> [-z --zero-loc]
+      [-t --type <unit>]
+    Conversion of Micheline expression from Micheline, JSON or binary to Micheline, JSON, binary or OCaml
+    <source>: literal or a path to a file
+    <input_format>: format of the input for conversion
+    <output_format>: format of the conversion output
+    -z --zero-loc: replace location with "0"
+    -t --type <unit>: the given data will be type-checked against this type
+  wait for <operation> to be included [--confirmations <num_blocks>]
+      [--check-previous <num_blocks>] [--branch <block_hash>]
+    Wait until an operation is included in a block
+    <operation>: Operation to be included
+    --confirmations <num_blocks>: wait until 'N' additional blocks after the operation appears in the considered chain
+    --check-previous <num_blocks>: number of previous blocks to check
+    --branch <block_hash>: hash of the oldest block where we should look for the operation
+  get receipt for <operation> [--check-previous <num_blocks>]
+    Get receipt for past operation
+    <operation>: Operation to be looked up
+    --check-previous <num_blocks>: number of previous blocks to check
