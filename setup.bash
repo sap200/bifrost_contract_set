@@ -47,7 +47,7 @@ tezos-client get balance for bob
 echo "deploying bifrost contract and returning contract address..."
 echo "--------------------------------------------------------"
 echo ""
-tezos-client originate contract bifrost transferring 0 from alice running ./contracts/bifrost.tz --fee 1 --force --init "(Pair (Pair {} (Pair {} 0)) (Pair {} (Pair 0 \"$(cat ./keys/alice_pub.txt)\")))" --burn-cap 0.6915 1>& bifrost_contract.txt
+tezos-client originate contract bifrost transferring 0 from alice running ./contracts/bifrost.tz --fee 1 --force --init "(Pair (Pair {} (Pair {} 0)) (Pair {} (Pair 0 \"$(cat ./keys/alice_pub.txt)\")))"  --burn-cap 0.755 1>& bifrost_contract.txt
 
 echo "Writing contract address to ./contract_addr/bifrost_contract.txt"
 echo ""

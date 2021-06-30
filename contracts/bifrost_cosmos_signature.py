@@ -56,7 +56,7 @@ class bifrost(sp.Contract):
     
     # send money to the cosmos chain
     @sp.entry_point        
-    def send_to_cosmos(self, _receiver, _src_chain, _dest_chain):
+    def send_to_cosmos(self, _receiver, _src_chain, _dest_chain, _signature):
         # check if sender field is empty 
         sp.verify(sp.amount != sp.mutez(0), "sending amount is 0")
         
@@ -71,7 +71,7 @@ class bifrost(sp.Contract):
         # 3 tx status
         # initiated, pending, success, failed
         _tx_id = sp.local('_tx_id', self.data.counter)
-        record = sp.record(tx_id=_tx_id.value, tz_sender=sp.sender, cosmos_receiver=_receiver, amount=sp.amount, src_chain=_src_chain, dest_chain=_dest_chain, tx_status=Initiated, time_stamp=sp.timestamp(int(time.time())))
+        record = sp.record(tx_id=_tx_id.value, tz_sender=sp.sender, cosmos_receiver=_receiver, amount=sp.amount, src_chain=_src_chain, dest_chain=_dest_chain, signature=_signature, tx_status=Initiated, time_stamp=sp.timestamp(int(time.time())))
         self.data.counter += 1
         
         # push data
@@ -89,6 +89,7 @@ class bifrost(sp.Contract):
             # amount to be unlocker
             amt = sp.local('amt', self.data.cosmos_send[_tx_id].amount)
             self.data.locker[_address] -= amt.value
+            self.data.locker_balance -= amt.value
             # check and update locker
             sp.if self.data.locker_balance >= amt.value:
                 sp.if self.data.accounts.contains(_address):
@@ -97,10 +98,10 @@ class bifrost(sp.Contract):
                 sp.else:
                     self.data.accounts[_address] = amt.value
                     del self.data.cosmos_send[_tx_id]
-            self.data.locker_balance -= amt.value
     
     @sp.entry_point
     def unlock_tezos(self, _address, _amount):
+        sp.verify(sp.sender == self.data.owner)
         sp.set_type(_amount, sp.TMutez)
         sp.set_type(_address, sp.TAddress)
         sp.verify(self.data.locker_balance >= _amount)
@@ -130,16 +131,16 @@ def test():
     # withdraw
     # c.withdraw().run(sender=alice, amount=sp.tez(100))
     
-    c.send_to_cosmos(_receiver="cosmos1abdeffesaeddfnawidnniee", _src_chain="tezos_chain", _dest_chain="mars").run(sender=alice, amount=sp.tez(100))
+    c.send_to_cosmos(_receiver="cosmos1abdeffesaeddfnawidnniee", _src_chain="tezos_chain", _dest_chain="mars", _signature="b1312dsarf23r423").run(sender=alice, amount=sp.tez(100))
     
-    c.send_to_cosmos(_receiver="cosmos1abdeffesaeddfnawidnniee", _src_chain="tezos_chain", _dest_chain="mars").run(sender=alice, amount=sp.tez(100))
+    c.send_to_cosmos(_receiver="cosmos1abdeffesaeddfnawidnniee", _src_chain="tezos_chain", _dest_chain="mars", _signature="b121sdfe334r2").run(sender=alice, amount=sp.tez(100))
     
-    c.send_to_cosmos(_receiver="cosmos1abdeffesaeddfnawidnniee", _src_chain="tezos_chain", _dest_chain="mars").run(sender=alice, amount=sp.tez(100))
+    c.send_to_cosmos(_receiver="cosmos1abdeffesaeddfnawidnniee", _src_chain="tezos_chain", _dest_chain="mars", _signature="b213dsfw2r2").run(sender=alice, amount=sp.tez(100))
     
    
     
     c.update_tx_status(_tx_id=0, _status=Failed).run(sender=owner)
-    c.unlock_tezos(_address=bob, _amount=sp.tez(200))
+    c.unlock_tezos(_address=bob, _amount=sp.tez(200)).run(sender=owner)
     scenario.h2("Data")
     
     # # withdraw fails as amount is locked
