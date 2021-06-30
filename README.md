@@ -54,7 +54,7 @@ $ ./send_to_cosmos cosmos1j5pz7cp5w6wr65z47azefzygcevqssrguccc88 100 alice
 #### send FA12 tokens to cosmos
 
 ```
-gedit fa12send.bash
+$ gedit fa12send.bash
 
 #!/bin/bash
 
@@ -88,14 +88,14 @@ tezos-client -w 15 transfer 0 from bob to "$(cat ../contract_addr/fa12.txt)" --f
 After editing
 ```
 $ chmod +x fa12send.bash
-$ ./fa12send.bash cosmos1j5pz7cp5w6wr65z47azefzygcevqssrguccc88
+$ ./fa12send.bash 
 ```
 
 or in new version
 
 ```
 $ ./fa12send.bash [cosmos_receiver]
-$ ./fa12send.bash 
+$ ./fa12send.bash cosmos1j5pz7cp5w6wr65z47azefzygcevqssrguccc88
 ```
 
 #### Fetch the contract address
