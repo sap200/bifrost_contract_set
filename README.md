@@ -8,9 +8,11 @@ This is a repo containing bifrost contract set that needs to be deployed in tezo
 
 ## Installation
 
-Install tezos-client 
+step1 : Install tezos-client 
 
 [find tezos-client installation guide here](https://assets.tqtezos.com/docs/setup/1-tezos-client/)
+
+step2 : Clone and setup the repo
 
 ```
 $ git clone github.com/sap200/bifrost_contract_set
